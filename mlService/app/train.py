@@ -47,6 +47,13 @@ try:
     process_data(dataframe)
 
     train_model(LogisticRegression(max_iter=100))
+    train_model(
+        KNeighborsClassifier(
+            n_neighbors=5,
+            weights="uniform",
+            n_jobs=-1,
+        )
+    )
 
 
 except Exception as e:
