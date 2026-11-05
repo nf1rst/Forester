@@ -1,0 +1,6 @@
+pandas 
+scikit-learn 
+fastapi
+uvicorn[standard]
+mlflow==3.17.2
+pathlib
