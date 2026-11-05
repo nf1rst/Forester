@@ -54,6 +54,15 @@ try:
             n_jobs=-1,
         )
     )
+    train_model(
+        RandomForestClassifier(
+            n_estimators=50,
+            max_depth=20,
+            min_samples_leaf=5,
+            n_jobs=1,
+            random_state=42,
+        )
+    )
 
 
 except Exception as e:
