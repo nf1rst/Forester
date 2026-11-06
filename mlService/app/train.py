@@ -1,11 +1,12 @@
 from pathlib import Path
 
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from pandas import DataFrame
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
@@ -17,7 +18,7 @@ def process_data(data: DataFrame):
     y = dataframe.iloc[:, -1]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
+        X, y, test_size=0.2, random_state=42, stratify=y
     )
 
     scaler = StandardScaler()
@@ -25,17 +26,35 @@ def process_data(data: DataFrame):
     X_test_scaled = scaler.transform(X_test)
 
 
-def train_model(model: BaseEstimator):
-    if hasattr(model, "tree_"):
-        model.fit(X_train, y_train)
-        predictions = model.predict(X_test)
+def train_model(name: str, model: BaseEstimator, use_scaled_set: bool):
+    trusted_types = None
+    if use_scaled_set:  # not a tree based model
+        X_tr, X_te = X_train_scaled, X_test_scaled
     else:
-        model.fit(X_train_scaled, y_train)
-        predictions = model.predict(X_test_scaled)
+        X_tr, X_te = X_train, X_test
+        trusted_types = "sklearn.tree._tree.Tree"
 
-    print("Finished training")
+    with mlflow.start_run(run_name=name):
+        model.fit(X_tr, y_train)
+        predictions = model.predict(X_te)
 
-    print(f1_score(y_test, predictions, average="macro"))
+        macro_f1 = f1_score(y_test, predictions, average="macro")
+        acc = accuracy_score(y_test, predictions)
+
+        params = model.get_params()
+        for param_name, param_value in params.items():
+            if param_value is not None:
+                mlflow.log_param(param_name, param_value)
+
+        mlflow.log_metric("accuracy", acc)
+        mlflow.log_metric("macro_f1", macro_f1)
+
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            name=name,
+            registered_model_name="cover-classifier",
+            skops_trusted_types=trusted_types,
+        )
 
 
 try:
@@ -46,24 +65,29 @@ try:
 
     process_data(dataframe)
 
-    train_model(LogisticRegression(max_iter=100))
-    train_model(
-        KNeighborsClassifier(
-            n_neighbors=5,
-            weights="uniform",
-            n_jobs=-1,
-        )
-    )
-    train_model(
-        RandomForestClassifier(
-            n_estimators=50,
-            max_depth=20,
-            min_samples_leaf=5,
-            n_jobs=1,
-            random_state=42,
-        )
-    )
+    models = [
+        (
+            "KNN",
+            KNeighborsClassifier(n_neighbors=5, weights="uniform", n_jobs=-1),
+            True,
+        ),
+        (
+            "RFC",
+            RandomForestClassifier(
+                n_estimators=50,
+                max_depth=20,
+                min_samples_leaf=5,
+                n_jobs=1,
+                random_state=42,
+            ),
+            False,
+        ),
+    ]
 
+    for name, model, use_scaled in models:
+        print("Training model")
+        train_model(name, model, use_scaled)
+        print("Training finished")
 
 except Exception as e:
     print(f"Cannot find the file specified: {e}")
