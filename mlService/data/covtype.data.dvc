@@ -1,5 +1,5 @@
 outs:
-- md5: be1fc3518359b012ec5efb3269373d66
-  size: 75169189
-  hash: md5
-  path: covtype.data
+  - md5: be1fc3518359b012ec5efb3269373d66
+    size: 75169189
+    hash: md5
+    path: covtype.data
