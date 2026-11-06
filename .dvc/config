@@ -2,4 +2,3 @@
     remote = azstorage
 ['remote "azstorage"']
     url = azure://dvc-data/covtype
-    account_name = testingblobdvops
