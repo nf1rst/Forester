@@ -1,5 +1,9 @@
+import os
+
 import mlflow
 from mlflow import MlflowClient
+
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001"))
 
 NAME = "cover-classifier"
 client = MlflowClient()
