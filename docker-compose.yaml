@@ -1,0 +1,24 @@
+services:
+  mlflow-server:
+    build: ./mlFlowServer
+    ports:
+    - "5001:5001"
+    volumes:
+      - ./mlflow-data:/mlflow
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+
+  fastapi-container:
+    build: ./mlService
+    ports:
+      - "8081:8081"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5001
+    depends_on:
+      mlflow-server:
+        condition: service_healthy
