@@ -104,3 +104,42 @@ def predict(data: InputData):
     ]
     prediction = model.predict(sample)
     return {"prediction": int(prediction[0])}
+
+
+class BatchInputData(BaseModel):
+    instances: list[InputData]
+
+
+@app.post("/predict/batch")
+def predictBatch(data_list: BatchInputData):
+    if model is None:
+        load_champion()
+    if model is None:
+        raise HTTPException(status_code=503, detail="No champion model available yet")
+
+    samples = []
+
+    for data in data_list.instances:
+        wilderness_area_binary = [
+            1 if data.Wilderness_Area == i else 0 for i in range(1, 5)
+        ]
+        soil_binary = [1 if data.Soil_Type == i else 0 for i in range(1, 41)]
+
+        sample = [
+            data.Elevation,
+            data.Aspect,
+            data.Slope,
+            data.Horizontal_Distance_To_Hydrology,
+            data.Vertical_Distance_To_Hydrology,
+            data.Horizontal_Distance_To_Roadways,
+            data.Hillshade_9am,
+            data.Hillshade_Noon,
+            data.Hillshade_3pm,
+            data.Horizontal_Distance_To_Fire_Points,
+            *wilderness_area_binary,
+            *soil_binary,
+        ]
+        samples.append(sample)
+
+    predictions = model.predict(samples)
+    return {"predictions": [int(p) for p in predictions]}
