@@ -16,7 +16,7 @@ services:
   fastapi-container:
     build: ./mlService
     ports:
-      - "8081:8081"
+      - "8000:8000"
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow-server:5001
     depends_on:
