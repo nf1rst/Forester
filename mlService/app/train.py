@@ -84,6 +84,11 @@ try:
     base_dir = Path(__file__).resolve().parent.parent
     input_file = base_dir / "data" / "covtype.data"
 
+    if not input_file.exists():
+        raise FileNotFoundError(
+            f"The file {input_file} has not been found, try running the dvc pull to get files locally"
+        )
+
     dataframe = pd.read_csv(input_file, header=None)
 
     process_data(dataframe)

@@ -4,3 +4,4 @@ fastapi
 uvicorn[standard]
 mlflow==3.17.2
 pathlib
+pytest==9.2.0
