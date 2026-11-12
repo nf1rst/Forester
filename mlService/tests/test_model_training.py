@@ -58,13 +58,13 @@ def test_RFC_parameters(champion_model):
 
 
 def test_macro_f1_score_between_0_1(champion_model):
-    smallest_macro_f1 = mlflow.search_runs(filter_string="metrics.macro_f1 <0")
+    smallest_macro_f1 = mlflow.search_runs(filter_string="metrics.macro_f1 < 0")
     greaterst_macro_f1 = mlflow.search_runs(filter_string="metrics.macro_f1>1")
 
     assert len(smallest_macro_f1) == 0
     assert len(greaterst_macro_f1) == 0
 
 
-# def test_model_fit_execution(champion_model, data_sets):
-#     X_train, _, y_train, _ = data_sets
-#     assert champion_model.fit(X_train, y_train)
+def test_model_fit_execution(champion_model, data_sets):
+    X_train, _, y_train, _ = data_sets
+    assert champion_model.fit(X_train, y_train)

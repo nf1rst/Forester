@@ -1,7 +1,8 @@
 # focus on data loading, validation, missing value check, stratification and scaling
-import pytest
 from pathlib import Path
+
 import pandas as pd
+import pytest
 from sklearn.model_selection import train_test_split
 
 
