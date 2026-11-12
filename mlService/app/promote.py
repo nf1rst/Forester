@@ -33,13 +33,14 @@ def promote_latest_version(client):
         if latest_model_macro >= champion_macro + 0.02:
             client.set_registered_model_alias(NAME, "champion", latest.version)
             print(f"Promoted version: {latest.version} to champion")
+        elif latest_model_macro >= 0.80:
+            client.set_registered_model_alias(NAME, "challanger", latest.version)
         else:
             print(
                 f"Quality gate failed: New macro-F1 ({latest_model_macro:.3f}) "
                 f"did not beat baseline ({champion_macro:.3f}) + 0.02 "
                 f"(Required: {champion_macro + 0.02:.3f})"
             )
-        print("in the try block")
 
 
 if __name__ == "__main__":
