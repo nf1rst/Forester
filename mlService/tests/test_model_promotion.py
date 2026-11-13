@@ -63,3 +63,20 @@ def test_champion_stays_champion_if_new_model_under_threshold():
     promote_latest_version(client)
 
     client.set_registered_model_alias.assert_not_called()
+
+
+def test_new_model_passes_threshold_but_is_not_champion_becomes_challanger():
+    client = MagicMock()
+    old = make_version("1", "run_1")
+    new = make_version("2", "run_2")
+    client.search_model_versions.return_value = [old, new]
+    client.get_model_version_by_alias.return_value = old
+
+    runs = {"run_1": make_run(0.85), "run_2": make_run(0.86)}
+    client.get_run.side_effect = lambda run_id: runs[run_id]
+
+    promote_latest_version(client)
+
+    client.set_registered_model_alias.assert_called_once_with(
+        "cover-classifier", "challanger", "2"
+    )

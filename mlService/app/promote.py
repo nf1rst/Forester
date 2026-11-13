@@ -27,6 +27,9 @@ def promote_latest_version(client):
             print(f"Set the initial champion to the {latest.version}")
             continue
 
+        if str(latest.version) == str(current_champion.version):
+            continue  # already a champion so there is nothing to compare
+
         champion_run = client.get_run(current_champion.run_id)
         champion_macro = champion_run.data.metrics["macro_f1"]
 
