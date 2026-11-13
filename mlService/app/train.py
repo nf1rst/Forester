@@ -12,23 +12,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
-mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001"))
 
-mlflow.set_experiment("coverType-classifier")
+def configure_mlFlow():
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5001"))
+    mlflow.set_experiment("coverType-classifier")
 
 
 def process_data(data: DataFrame):
-    global \
-        X_train, \
-        y_train, \
-        X_test, \
-        y_test, \
-        X_train_scaled, \
-        X_test_scaled, \
-        X_train_knn, \
-        y_train_knn
-    X = dataframe.iloc[:, :-1].astype("float32")
-    y = dataframe.iloc[:, -1]
+    X = data.iloc[:, :-1].astype("float32")
+    y = data.iloc[:, -1]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
@@ -41,28 +33,38 @@ def process_data(data: DataFrame):
     X_train_knn, _, y_train_knn, _ = train_test_split(
         X_train_scaled, y_train, train_size=30000, random_state=42, stratify=y_train
     )
+    return dict(
+        X_train=X_train,
+        y_train=y_train,
+        X_test=X_test,
+        y_test=y_test,
+        X_train_scaled=X_train_scaled,
+        X_test_scaled=X_test_scaled,
+        X_train_knn=X_train_knn,
+        y_train_knn=y_train_knn,
+    )
 
 
 def train_model(
-    name: str, model: BaseEstimator, use_scaled_set: bool, use_knn_subset: bool
+    name: str, model: BaseEstimator, use_scaled_set: bool, use_knn_subset: bool, d
 ):
     trusted_types = None
     if use_knn_subset:
-        X_tr, y_tr = X_train_knn, y_train_knn
+        X_tr, y_tr = d["X_train_knn"], d["y_train_knn"]
     elif use_scaled_set:  # not a tree based model
-        X_tr, y_tr = X_train_scaled, y_train
+        X_tr, y_tr = d["X_train_scaled"], d["y_train"]
     else:
-        X_tr, y_tr = X_train, y_train
+        X_tr, y_tr = d["X_train"], d["y_train"]
         trusted_types = "sklearn.tree._tree.Tree"
 
-    X_te = X_test_scaled if use_scaled_set else X_test
+    X_te = d["X_test_scaled"] if use_scaled_set else d["X_test"]
 
     with mlflow.start_run(run_name=name):
         model.fit(X_tr, y_tr)
         predictions = model.predict(X_te)
 
-        macro_f1 = f1_score(y_test, predictions, average="macro")
-        acc = accuracy_score(y_test, predictions)
+        macro_f1 = f1_score(d["y_test"], predictions, average="macro")
+        acc = accuracy_score(d["y_test"], predictions)
 
         params = model.get_params()
         for param_name, param_value in params.items():
@@ -80,7 +82,8 @@ def train_model(
         )
 
 
-try:
+def main():
+    configure_mlFlow()
     base_dir = Path(__file__).resolve().parent.parent
     input_file = base_dir / "data" / "covtype.data"
 
@@ -89,9 +92,9 @@ try:
             f"The file {input_file} has not been found, try running the dvc pull to get files locally"
         )
 
-    dataframe = pd.read_csv(input_file, header=None)
+    d = pd.read_csv(input_file, header=None)
 
-    process_data(dataframe)
+    process_data(d)
 
     models = [
         (
@@ -119,5 +122,6 @@ try:
         train_model(name, model, use_scaled, use_knn)
         print("Training finished")
 
-except Exception as e:
-    print(f"Something went wrong: {e}")
+
+if __name__ == "__main__":
+    main()
