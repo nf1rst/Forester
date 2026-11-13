@@ -92,9 +92,9 @@ def main():
             f"The file {input_file} has not been found, try running the dvc pull to get files locally"
         )
 
-    d = pd.read_csv(input_file, header=None)
+    df = pd.read_csv(input_file, header=None)
 
-    process_data(d)
+    d = process_data(df)
 
     models = [
         (
@@ -119,7 +119,7 @@ def main():
 
     for name, model, use_scaled, use_knn in models:
         print("Training model")
-        train_model(name, model, use_scaled, use_knn)
+        train_model(name, model, use_scaled, use_knn, d)
         print("Training finished")
 
 
