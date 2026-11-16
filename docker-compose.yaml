@@ -22,3 +22,16 @@ services:
     depends_on:
       mlflow-server:
         condition: service_healthy
+
+  forester-web-application:
+    build: ./foresterService
+    ports:
+      - "8080:8080"
+    environment:
+      - FORESTER_DB_PATH=/app/data/forester.db
+      - ConnectionStrings__ForesterConnection=Data Source=/app/data/forester.db
+    volumes:
+      - ./forester-data:/app/data
+    depends_on:
+      fastapi-container:
+        condition: service_started
