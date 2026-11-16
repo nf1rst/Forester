@@ -10,4 +10,8 @@
     <ProjectReference Include="../Forester.DAL/Forester.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="17.0.0" />
+  </ItemGroup>
+
 </Project>
