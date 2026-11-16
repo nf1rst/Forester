@@ -1,4 +1,5 @@
 using Forester.API.Components;
+using Forester.Application.Extensions;
 using Forester.DAL.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 var connectionString = $"Data Source={dbPath}";
 
 builder.Services.SetDALServices(connectionString);
+builder.Services.SetApplicationServices();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();

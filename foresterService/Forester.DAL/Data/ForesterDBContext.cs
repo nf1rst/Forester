@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.Intrinsics.X86;
 using Forester.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +8,8 @@ public class ForesterDBContext : IdentityDbContext<User>
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Log> Logs { get; set; }
+
+    public ForesterDBContext(DbContextOptions<ForesterDBContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
