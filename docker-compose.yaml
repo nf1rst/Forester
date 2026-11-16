@@ -30,8 +30,10 @@ services:
     environment:
       - FORESTER_DB_PATH=/app/data/forester.db
       - ConnectionStrings__ForesterConnection=Data Source=/app/data/forester.db
+      - FORESTER_KEY_PATH=/app/keys
     volumes:
       - ./forester-data:/app/data
+      - ./keys:/app/keys
     depends_on:
       fastapi-container:
         condition: service_started

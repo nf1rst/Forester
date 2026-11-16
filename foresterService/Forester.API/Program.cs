@@ -1,6 +1,7 @@
 using Forester.API.Components;
 using Forester.Application.Extensions;
 using Forester.DAL.Extensions;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,14 @@ var connectionString = $"Data Source={dbPath}";
 
 builder.Services.SetDALServices(connectionString);
 builder.Services.SetApplicationServices();
+
+
+var keysPath = Environment.GetEnvironmentVariable("FORESTER_KEYS_PATH")
+    ?? Path.Combine(builder.Environment.ContentRootPath, "keys");
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("Forester")
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
