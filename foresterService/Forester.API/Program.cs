@@ -1,4 +1,5 @@
 using Forester.API.Components;
+using Forester.DAL.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+var dbPath = Environment.GetEnvironmentVariable("FORESTER_DB_PATH") ??
+    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db");
+Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
+var connectionString = $"Data Source={dbPath}";
+
+builder.Services.SetDALServices(connectionString);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
