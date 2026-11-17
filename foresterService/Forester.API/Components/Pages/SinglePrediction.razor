@@ -1,5 +1,6 @@
 ﻿@page "/singlePrediction"
 @using System.Text.RegularExpressions
+@using Forester.Application.Exceptions
 @using Forester.Application.Interfaces
 @using Forester.Application.Services
 @using Forester.Domain.Entities
@@ -128,47 +129,62 @@
     [Inject] private ILogService LogService { get; set; } = default!;
     private async Task HandlePrediction()
     {
-        if (validInputValues(userInputs))
+        try
         {
-            try
-            {
-                HttpClient client = new HttpClient();
-                client.BaseAddress = new Uri(modelContactContainerURL);
+            modelPredictionResult = 0;
+            errorMessage = "";
+            ValidateInputValues(userInputs);
 
-                HttpResponseMessage response = await client.PostAsJsonAsync("predict/single", userInputs, new
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(modelContactContainerURL);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("predict/single", userInputs, new
 System.Text.Json.JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = null
-                });
-
-
-                //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
-                string predictionResultString = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
-
-                modelPredictionResult = int.Parse(predictionResultString);
-
-                StateHasChanged();
-            }
-            catch (Exception e)
             {
-                Console.WriteLine($"Connection to API failed: {e.Message}");
-                errorMessage = "Model cannot be contacted, blame the developers and please try again later";
-            }
-            //https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
-            //contact FASTAPI for model prediciton
+                PropertyNamingPolicy = null
+            });
 
+
+            //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
+            string predictionResultString = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
+
+            modelPredictionResult = int.Parse(predictionResultString);
+
+            StateHasChanged();
         }
-        else
+        catch (InvalidInputException e)
         {
-            errorMessage = "Invalid input values detected, please try again";
+            errorMessage = $"Input values are invalid, please try again: {e.Message}";
         }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Connection to API failed: {e.Message}");
+            errorMessage = "Model cannot be contacted, blame the developers and please try again later";
+        }
+        //https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
+        //contact FASTAPI for model prediciton
 
     }
 
-    private bool validInputValues(UserInput model)
+    private void ValidateInputValues(UserInput input)
     {
-        return true;
-        //TODO
+        if (!HillshadeBetween0And255(input.Hillshade_3pm) || !HillshadeBetween0And255(input.Hillshade_9am) ||
+            !HillshadeBetween0And255(input.Hillshade_Noon))
+        {
+            throw new InvalidInputException("Hillshade values must be between 0 and 255");
+        }
+        if (input.Slope < 0 || input.Slope > 360)
+        {
+            throw new InvalidInputException("Slope values must be between 0 and 360");
+        }
+        if (input.Wilderness_Area < 1 || input.Wilderness_Area > 4)
+        {
+            throw new InvalidInputException("Wilderness area value must be between 1 and 4");
+        }
+        if (input.Soil_Type < 1 || input.Soil_Type > 40)
+        {
+            throw new InvalidInputException("Soil type value must be between 1 and 40");
+        }
     }
 
     private bool HillshadeBetween0And255(int hillshade)
