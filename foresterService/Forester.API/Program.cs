@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var dbPath = Environment.GetEnvironmentVariable("FORESTER_DB_PATH") ??
-    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db");
+    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db"); //forester.API/*
 Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
 var connectionString = $"Data Source={dbPath}";
@@ -20,7 +20,7 @@ builder.Services.SetApplicationServices();
 
 
 var keysPath = Environment.GetEnvironmentVariable("FORESTER_KEYS_PATH")
-    ?? Path.Combine(builder.Environment.ContentRootPath, "keys");
+    ?? Path.Combine(builder.Environment.ContentRootPath, "keys"); //forester.API/*
 
 builder.Services.AddDataProtection()
     .SetApplicationName("Forester")

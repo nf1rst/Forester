@@ -43,7 +43,7 @@ def crown_first_champion():
             client.set_registered_model_alias(NAME, "champion", latest_version.version)
 
         model = mlflow.sklearn.load_model(f"models:/{NAME}@champion")
-        model_name_alias = f"{NAME} /v{latest_version.verion} (champion)"
+        model_name_alias = f"{NAME} /v{latest_version.version} (champion)"
     except Exception as e:
         print(f"WARNING: Something went wrong in the crown_first_champion mehtod: {e}")
 
