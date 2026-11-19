@@ -26,6 +26,19 @@ Run local mlRegistry:
 Run fastAPI (from mlService/app)
 `python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
 
+Run the Web application from an IDE 
+
+### Container start 
+Run
+`docker compose up--build`
+for stsarting the build process. The first tim might take a few minutes for the images to download. 
+
+Check the container status with
+`docker ps -a`
+
+Permanently remove the containers at once by
+`docker compose down -v`
+
 #### Registry fill
 If there are no models available in the registry, run the train.py script inside the mlService/app in a venv:
 `python train.py`
