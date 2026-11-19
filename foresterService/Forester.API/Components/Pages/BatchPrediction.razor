@@ -180,7 +180,7 @@ predictions)).AsQueryable();
         string modelContactContainerURL = "http://fastapi-container:8000/";
         string modelContactLocalURL = "http://localhost:8000/";
 
-        var result = await contactFastAPIService(modelContactContainerURL, csvInputsList);
+        var result = await contactFastAPIService(modelContactLocalURL, csvInputsList);
         return result;
     }
 
@@ -198,7 +198,7 @@ System.Text.Json.JsonSerializerOptions
                 
         var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
 
-        await LogService.LogUserBatchPredictionRequest(selectedFile.Name, selectedFile.Size, "Authentication under construction");
+        await LogService.LogUserBatchPredictionRequest(selectedFile.Name, selectedFile.Size, "asdf");
         return result?.predictions ?? new List<int>();
     }
 
