@@ -6,6 +6,8 @@
 @using Forester.Domain.Entities
 @using Microsoft.AspNetCore.Components;
 
+@inject ILogService Logservice
+
 @rendermode InteractiveServer
 @* https://stackoverflow.com/questions/65349476/blazor-cant-find-referenced-component-from-other-folder *@
 
@@ -151,6 +153,8 @@ System.Text.Json.JsonSerializerOptions
             modelPredictionResult = int.Parse(predictionResultString);
 
             StateHasChanged();
+            
+            await LogService.LogUserPredictionRequest(userInputs, modelPredictionResult, "Authentication under construction");
         }
         catch (InvalidInputException e)
         {

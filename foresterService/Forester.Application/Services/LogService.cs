@@ -23,6 +23,13 @@ public class LogService : ILogService
 
     }
 
+    public async Task LogUserBatchPredictionRequest(string fileName, long fileSize, string username)
+    {
+        string text = $"Filename: {fileName},  FileSize: {fileSize}";
+        Log log = new Log() { Text = text, LogTypeID = 1, UserUsername = username };
+        await uow.Logs.InsertLogAsync(log);
+    }
+
     public async Task LogUserPredictionRequest(UserInput userInput, int predictionResult, string userUsername)
     {
         String text = $"{userInput.Elevation},{userInput.Aspect},{userInput.Slope}, {userInput.Horizontal_Distance_To_Hydrology}, {userInput.Vertical_Distance_To_Hydrology}, {userInput.Horizontal_Distance_To_Roadways}, {userInput.Hillshade_9am}, {userInput.Hillshade_Noon}, {userInput.Hillshade_3pm}, {userInput.Horizontal_Distance_To_Fire_Points}, {userInput.Wilderness_Area},  {userInput.Soil_Type}";

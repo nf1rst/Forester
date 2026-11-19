@@ -1,9 +1,11 @@
 ﻿@page "/batchPrediction"
 @using System.Text.RegularExpressions
-@using Microsoft.AspNetCore.Components.QuickGrid
+@using Forester.Application.Interfaces
 @using Forester.Domain.Entities
+@using Microsoft.AspNetCore.Components.QuickGrid
 @rendermode InteractiveServer
 
+@inject ILogService LogService
 
 <h2>Batch Prediction</h2>
 
@@ -170,6 +172,8 @@ System.Text.Json.JsonSerializerOptions
             PropertyNamingPolicy = null
         });
         var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
+
+        await LogService.LogUserBatchPredictionRequest(selectedFile.Name, selectedFile.Size, "Authentication under construction");
         return result?.predictions ?? new List<int>();
     }
     private void setUserInputBinaryValues(UserInput csvInput, int[] details)
