@@ -1,7 +1,9 @@
 using Forester.API.Components;
 using Forester.Application.Extensions;
+using Forester.DAL.Data;
 using Forester.DAL.Extensions;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var dbPath = Environment.GetEnvironmentVariable("FORESTER_DB_PATH") ??
-    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db"); //forester.API/*
-Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+var dataDir = builder.Configuration["FORESTER_DATA_DIR"]
+    ?? Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "forester-data"));
+
+
+var dbPath = Path.Combine(dataDir, "forester.db");
+var keysPath = Path.Combine(dataDir, "keys");
+
+
+Directory.CreateDirectory(dataDir);
+Directory.CreateDirectory(keysPath);
 
 var connectionString = $"Data Source={dbPath}";
 
@@ -19,15 +28,18 @@ builder.Services.SetDALServices(connectionString);
 builder.Services.SetApplicationServices();
 
 
-var keysPath = Environment.GetEnvironmentVariable("FORESTER_KEYS_PATH")
-    ?? Path.Combine(builder.Environment.ContentRootPath, "keys"); //forester.API/*
-
 builder.Services.AddDataProtection()
     .SetApplicationName("Forester")
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ForesterDBContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -137,7 +137,7 @@
 
             StateHasChanged();
             
-            await LogService.LogUserPredictionRequest(userInputs, modelPredictionResult, "Authentication under construction");
+            await LogService.LogUserPredictionRequest(userInputs, modelPredictionResult, "asdf");
         }
         catch (InvalidInputException e)
         {
@@ -158,7 +158,7 @@
         string modelContactContainerURL = "http://fastapi-container:8000/";
         string modelContactURLLocal = "http://localhost:8000/";
 
-        await contactFastAPIService(modelContactContainerURL, userInputs);
+        await contactFastAPIService(modelContactURLLocal, userInputs);
         //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
     }
 
