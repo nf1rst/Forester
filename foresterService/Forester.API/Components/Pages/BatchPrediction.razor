@@ -33,13 +33,21 @@
                 <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
                 <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
                 <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
-                <PropertyColumn Property="@(p => p.Result)" Title="Predicted Cover Type" />
+                <PropertyColumn Property="@(p => p.Result)" Title="Prediction" class="prediction-result-column" />
             </QuickGrid>
 
             <Paginator State="@pagination" />
         </div>
     }
     <style>
+        .prediction-result-column {
+            color: red;
+        }
+
+        .quick-grid {
+            word-wrap: break-word;
+        }
+
         .upload-element::file-selector-button {
             display: block;
             margin-left: auto;
@@ -149,14 +157,14 @@ predictions)).AsQueryable();
 
     private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
     {
-        string modelContactContainerURL = "http://fastapi-app:8000/";
+        string modelContactContainerURL = "http://fastapi-container:8000/";
         string modelContactLocalURL = "http://localhost:8000/";
 
         HttpClient client = new HttpClient();
         client.BaseAddress = new Uri(modelContactContainerURL);
 
         var payload = new { instances = csvInputsList };
-        HttpResponseMessage response = await client.PostAsJsonAsync("batchPredict", payload, new
+        HttpResponseMessage response = await client.PostAsJsonAsync("predict/batch", payload, new
 System.Text.Json.JsonSerializerOptions
         {
             PropertyNamingPolicy = null
