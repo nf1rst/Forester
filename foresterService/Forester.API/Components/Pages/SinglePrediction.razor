@@ -9,7 +9,7 @@
 @rendermode InteractiveServer
 @* https://stackoverflow.com/questions/65349476/blazor-cant-find-referenced-component-from-other-folder *@
 
-@inject ILogService logService
+@inject ILogService LogService
 
 <h2>Single Prediction</h2>
 
@@ -122,11 +122,7 @@
 @code {
     private UserInput userInputs = new();
     private string errorMessage = "";
-    private const string modelContactContainerURL = "http://fastapi-container:8000/";
-    private const string modelContactURLLocal = "http://localhost:8000/";
     private int modelPredictionResult = 0;
-
-    [Inject] private ILogService LogService { get; set; } = default!;
     private async Task HandlePrediction()
     {
         try
@@ -135,20 +131,7 @@
             errorMessage = "";
             ValidateInputValues(userInputs);
 
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(modelContactContainerURL);
-
-            HttpResponseMessage response = await client.PostAsJsonAsync("predict/single", userInputs, new
-System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNamingPolicy = null
-            });
-
-
-            //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
-            string predictionResultString = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
-
-            modelPredictionResult = int.Parse(predictionResultString);
+            await sendSinglePredictionRequest(userInputs);
 
             StateHasChanged();
         }
@@ -164,6 +147,34 @@ System.Text.Json.JsonSerializerOptions
         //https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient
         //contact FASTAPI for model prediciton
 
+    }
+
+    private async Task sendSinglePredictionRequest(UserInput userInputs)
+    {
+        string modelContactContainerURL = "http://fastapi-container:8000/";
+        string modelContactURLLocal = "http://localhost:8000/";
+
+        await contactFastAPIService(modelContactContainerURL, userInputs);
+        //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
+    }
+
+    private async Task contactFastAPIService(string modelContactContainerURL, UserInput userInputs)
+    {
+        HttpClient client = new HttpClient();
+        client.BaseAddress = new Uri(modelContactContainerURL);
+
+        HttpResponseMessage response = await client.PostAsJsonAsync("predict/single", userInputs, new
+System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = null
+        });
+        modelPredictionResult = await ParsePredictionResponse(response);
+    }
+
+    private async Task<int> ParsePredictionResponse(HttpResponseMessage response)
+    {
+        var result = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
+        return int.Parse(result);
     }
 
     private void ValidateInputValues(UserInput input)
