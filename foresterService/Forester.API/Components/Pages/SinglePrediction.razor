@@ -156,9 +156,9 @@
     private async Task sendSinglePredictionRequest(UserInput userInputs)
     {
         string modelContactContainerURL = "http://fastapi-container:8000/";
-        string modelContactURLLocal = "http://localhost:8000/";
+        string modelContactLocalURL = "http://localhost:8000/";
 
-        await contactFastAPIService(modelContactURLLocal, userInputs);
+        await contactFastAPIService(modelContactLocalURL, userInputs);
         //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
     }
 
