@@ -52,5 +52,7 @@ public class LogService : ILogService
             Prediction = predictionResult
         };
         await uow.Logs.InsertLogAsync(log);
+
+        await uow.SaveChangesAsync();
     }
 }
