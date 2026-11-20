@@ -180,7 +180,7 @@ predictions)).AsQueryable();
         string modelContactContainerURL = "http://fastapi-container:8000/";
         string modelContactLocalURL = "http://localhost:8000/";
 
-        var result = await contactFastAPIService(modelContactLocalURL, csvInputsList);
+        var result = await contactFastAPIService(modelContactContainerURL, csvInputsList);
         return result;
     }
 
