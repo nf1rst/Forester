@@ -28,7 +28,7 @@ builder.Services.AddIdentityCore<User>()
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
-    options.AccessDeniedPath = "/access-denied";
+    options.AccessDeniedPath = "/error";
 });
 
 
@@ -53,12 +53,21 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddControllers();
 
+
 builder.Services.AddDataProtection()
-    .SetApplicationName("Forester")
-    .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+.PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+.SetApplicationName("Forester");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -66,24 +75,12 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
-
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
 
 app.MapControllers();
 
