@@ -2,28 +2,29 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 
+<AuthorizeView>
+    <div class="menu-bar">
+        <div class="nav-bar">
+            <nav>
+                <ul class="nav-bar-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="instructions">Instructions</a></li>
+                    <li><a href="batchPrediction">Batch prediction</a></li>
+                    <li><a class="singlePrediction" href="singlePrediction">Single prediction</a></li>
+                </ul>
+            </nav>
+        </div>
 
-<div class="menu-bar">
-    <div class="nav-bar">
-        <nav>
-            <ul class="nav-bar-list">
-                <li><a href="/">Home</a></li>
-                <li><a href="instructions">Instructions</a></li>
-                <li><a href="batchPrediction">Batch prediction</a></li>
-                <li><a class="singlePrediction" href="singlePrediction">Single prediction</a></li>
-            </ul>
-        </nav>
+        <div class="profile-bar">
+            <nav>
+                <ul>
+                    <li><a class="profile-button" href="profile">Profile (name)</a></li>
+                    <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
     </div>
-
-    <div class="profile-bar">
-        <nav>
-            <ul>
-                <li><a class="profile-button" href="profile">Profile (name)</a></li>
-                <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
-            </ul>
-        </nav>
-    </div>
-</div>
+</AuthorizeView>
 
 <style>
     .menu-bar {
