@@ -82,6 +82,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
+app.MapPost("/logout", async (SignInManager<User> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.LocalRedirect("~/login");
+}).RequireAuthorization();
+
 app.MapControllers();
 
 app.MapRazorComponents<App>()
