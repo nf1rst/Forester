@@ -177,11 +177,31 @@ namespace Forester.DAL.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Text = table.Column<string>(type: "TEXT", nullable: false),
                     LogTypeID = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserUsername = table.Column<string>(type: "TEXT", nullable: false)
+                    UserUsername = table.Column<string>(type: "TEXT", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Elevation = table.Column<int>(type: "INTEGER", nullable: false),
+                    Aspect = table.Column<int>(type: "INTEGER", nullable: false),
+                    Slope = table.Column<int>(type: "INTEGER", nullable: false),
+                    Horizontal_Distance_To_Hydrology = table.Column<int>(type: "INTEGER", nullable: false),
+                    Vertical_Distance_To_Hydrology = table.Column<int>(type: "INTEGER", nullable: false),
+                    Horizontal_Distance_To_Roadways = table.Column<int>(type: "INTEGER", nullable: false),
+                    Hillshade_9am = table.Column<int>(type: "INTEGER", nullable: false),
+                    Hillshade_Noon = table.Column<int>(type: "INTEGER", nullable: false),
+                    Hillshade_3pm = table.Column<int>(type: "INTEGER", nullable: false),
+                    Horizontal_Distance_To_Fire_Points = table.Column<int>(type: "INTEGER", nullable: false),
+                    Wilderness_Area = table.Column<int>(type: "INTEGER", nullable: false),
+                    Soil_Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Prediction = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Logs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Logs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Logs_LogType_LogTypeID",
                         column: x => x.LogTypeID,
@@ -236,6 +256,11 @@ namespace Forester.DAL.Migrations
                 name: "IX_Logs_LogTypeID",
                 table: "Logs",
                 column: "LogTypeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Logs_UserId",
+                table: "Logs",
+                column: "UserId");
         }
 
         /// <inheritdoc />

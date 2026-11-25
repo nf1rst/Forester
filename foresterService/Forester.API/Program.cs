@@ -1,7 +1,11 @@
 using Forester.API.Components;
 using Forester.Application.Extensions;
+using Forester.DAL.Data;
 using Forester.DAL.Extensions;
+using Forester.Domain.Entities;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,22 +13,50 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var dbPath = Environment.GetEnvironmentVariable("FORESTER_DB_PATH") ??
-    Path.Combine(builder.Environment.ContentRootPath, "forester-data", "forester.db"); //forester.API/*
-Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+}).AddIdentityCookies();
+
+builder.Services.AddIdentityCore<User>()
+    .AddEntityFrameworkStores<ForesterDBContext>()
+    .AddSignInManager();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.AccessDeniedPath = "/error";
+});
+
+
+var dataDir = builder.Configuration["FORESTER_DATA_DIR"]
+    ?? Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "forester-data"));
+
+
+var dbPath = Path.Combine(dataDir, "forester.db");
+var keysPath = Path.Combine(dataDir, "keys");
+
+
+Directory.CreateDirectory(dataDir);
+Directory.CreateDirectory(keysPath);
 
 var connectionString = $"Data Source={dbPath}";
 
 builder.Services.SetDALServices(connectionString);
 builder.Services.SetApplicationServices();
 
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
-var keysPath = Environment.GetEnvironmentVariable("FORESTER_KEYS_PATH")
-    ?? Path.Combine(builder.Environment.ContentRootPath, "keys"); //forester.API/*
+builder.Services.AddControllers();
+
 
 builder.Services.AddDataProtection()
-    .SetApplicationName("Forester")
-    .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+.PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+.SetApplicationName("Forester");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
@@ -32,16 +64,32 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ForesterDBContext>();
+    db.Database.Migrate();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapStaticAssets();
+app.MapPost("/logout", async (SignInManager<User> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.LocalRedirect("~/login");
+}).RequireAuthorization();
+
+app.MapControllers();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

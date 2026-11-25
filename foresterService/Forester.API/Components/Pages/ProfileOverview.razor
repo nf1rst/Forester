@@ -1,0 +1,94 @@
+﻿@page "/profile"
+@using Forester.Application.DTO.Logs
+@using Forester.Application.Interfaces
+@using Forester.Application.Services
+@using Forester.Domain.Entities
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.QuickGrid
+@rendermode InteractiveServer
+
+@inject ILogService LogService
+
+<AuthorizeView>
+
+    <h2>Hi, @context.User.Identity?.Name </h2>
+
+    <h6>Take a look at your request history</h6>
+
+    @if (isLoading)
+    {
+        <p class="status-text">Loading request history...</p>
+    }
+    else if (queryableLogs is null || !queryableLogs.Any())
+    {
+        <p class="status-text">No prediction requests found yet.</p>
+    }
+    else
+    {
+        <div class="result-display">
+            <QuickGrid Class="quick-grid" Items="@queryableLogs" Pagination="@pagination">
+                @* Adjust property names below to match your LogDTO fields *@
+                <PropertyColumn Property="@(l => l.Elevation)" Title="Elevation" Sortable="true" />
+                <PropertyColumn Property="@(l => l.Aspect)" Title="Aspect" />
+                <PropertyColumn Property="@(l => l.Slope)" Title="Slope" />
+                <PropertyColumn Property="@(l => l.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
+                <PropertyColumn Property="@(l => l.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
+                <PropertyColumn Property="@(l => l.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
+                <PropertyColumn Property="@(l => l.Hillshade_9am)" Title="Hillshade 9am" />
+                <PropertyColumn Property="@(l => l.Hillshade_Noon)" Title="Hillshade Noon" />
+                <PropertyColumn Property="@(l => l.Hillshade_3pm)" Title="Hillshade 3pm" />
+                <PropertyColumn Property="@(l => l.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
+                <PropertyColumn Property="@(l => l.Wilderness_Area)" Title="Wilderness (1-4)" />
+                <PropertyColumn Property="@(l => l.Soil_Type)" Title="Soil Type (1-40)" />
+                <PropertyColumn Property="@(l => l.Prediction)" Title="Prediction" />
+                <PropertyColumn Property="@(l => l.TimeStamp)" Title="Time" />
+            </QuickGrid>
+
+            <Paginator State="@pagination" />
+        </div>
+    }
+</AuthorizeView>
+
+<style>
+    h6,
+    h2 {
+        text-align: center;
+        margin-top: 1%
+    }
+
+    .quick-grid {
+        background-color: #1e1e1e;
+        width: 100%;
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+        table-layout: fixed;
+        font-size: 0.75rem;
+    }
+
+    .quick-grid th,
+    .quick-grid td {
+        text-align: center;
+        padding: 0.25rem;
+        overflow-wrap: anywhere;
+    }
+</style>
+
+@code {
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 15 };
+    private string username = "asdf";
+    private bool isLoading = true;
+    private IQueryable<LogDTO?> queryableLogs;
+    protected override async Task OnInitializedAsync()
+    {
+        ICollection<LogDTO> logs = new List<LogDTO>();
+        logs = await LogService.GetAllLogsByUserUsername(username);
+        queryableLogs = logs.AsQueryable();
+        isLoading = false;
+    }
+
+    public sealed class LogsPerUser
+    {
+        public ICollection<LogDTO> Logs { get; set; }
+    }
+}

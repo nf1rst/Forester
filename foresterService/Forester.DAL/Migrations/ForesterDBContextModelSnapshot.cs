@@ -23,20 +23,67 @@ namespace Forester.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Aspect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Elevation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Hillshade_3pm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Hillshade_9am")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Hillshade_Noon")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Horizontal_Distance_To_Fire_Points")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Horizontal_Distance_To_Hydrology")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Horizontal_Distance_To_Roadways")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("LogTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Prediction")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Slope")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Soil_Type")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("TimeStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("UserUsername")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Vertical_Distance_To_Hydrology")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Wilderness_Area")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LogTypeID");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Logs");
                 });
@@ -263,6 +310,10 @@ namespace Forester.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Forester.Domain.Entities.User", null)
+                        .WithMany("Logs")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("LogType");
                 });
 
@@ -318,6 +369,11 @@ namespace Forester.DAL.Migrations
                 });
 
             modelBuilder.Entity("Forester.Domain.Entities.LogType", b =>
+                {
+                    b.Navigation("Logs");
+                });
+
+            modelBuilder.Entity("Forester.Domain.Entities.User", b =>
                 {
                     b.Navigation("Logs");
                 });

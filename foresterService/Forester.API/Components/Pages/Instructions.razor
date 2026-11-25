@@ -1,20 +1,24 @@
 ﻿@page "/instructions"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <h2>Instructions</h2>
 
 <h3>This page contains secrets about the application's work principles</h3>
 
-
-<div class="notification-area">
-    <div class="notification-bubble">
-        <p class="notification-title">Single Prediction</p>
-        <p class="notification-text">Enter the information in the order it is displayed on the screen. Hit the predict
-            button to get a single prediction bsaed on your input data</p>
-        </div>
+<AuthorizeView>
+    <div class="notification-area">
         <div class="notification-bubble">
-            <p class="notification-title">Batch Prediction</p>
-            <p class="notification-text">Make sure you have a CSV file containing the data for a forest area. The order of
-                the inputs matters, and is stated at the top of the page. When sure, upload the CSV and click predict</p>
+            <p class="notification-title">Single Prediction</p>
+            <p class="notification-text">Enter the information in the order it is displayed on the screen. Hit the
+                predict
+                button to get a single prediction bsaed on your input data</p>
+            </div>
+            <div class="notification-bubble">
+                <p class="notification-title">Batch Prediction</p>
+                <p class="notification-text">Make sure you have a CSV file containing the data for a forest area. The order
+                    of
+                    the inputs matters, and is stated at the top of the page. When sure, upload the CSV and click predict
+                </p>
             </div>
             <div class="notification-bubble">
                 <p class="notification-title">History overview</p>
@@ -55,57 +59,57 @@
                 </p>
             </p>
         </div>
+    </AuthorizeView>
+    <style>
+        h2,
+        h3,
+        h4 {
+            text-align: center;
+            margin-top: 1%;
+        }
 
-        <style>
-            h2,
-            h3,
-            h4 {
-                text-align: center;
-                margin-top: 1%;
-            }
+        .notification-area {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: space-evenly;
+        }
 
-            .notification-area {
-                width: 90%;
-                margin-left: auto;
-                margin-right: auto;
-                display: flex;
-                justify-content: space-evenly;
-            }
+        .notification-bubble {
+            width: 31%;
+            border: 1px solid darkorange;
+            padding: 0.5%;
+            text-align: justify;
+        }
 
-            .notification-bubble {
-                width: 31%;
-                border: 1px solid darkorange;
-                padding: 0.5%;
-                text-align: justify;
-            }
+        .notification-title {
+            border-bottom: 1px solid orange;
+        }
 
-            .notification-title {
-                border-bottom: 1px solid orange;
-            }
+        .input-information {
+            margin-left: auto;
+            margin: auto;
+            text-align: center;
+            margin-top: 1%;
+        }
 
-            .input-information {
-                margin-left: auto;
-                margin: auto;
-                text-align: center;
-                margin-top: 1%;
-            }
+        .input-list {
+            list-style-type: circle;
+        }
 
-            .input-list {
-                list-style-type: circle;
-            }
+        .cover-list {
+            text-align: center;
+            width: 40%;
+            margin-left: auto;
+            margin-right: auto;
+            list-style: none;
+        }
 
-            .cover-list {
-                text-align: center;
-                width: 40%;
-                margin-left: auto;
-                margin-right: auto;
-                list-style: none;
-            }
+        .cover-list li,
+        .input-list li {
+            border-left: 1px solid orange;
+            border-right: 1px solid orange;
 
-            .cover-list li,
-            .input-list li {
-                border-left: 1px solid orange;
-                border-right: 1px solid orange;
-
-            }
-        </style>
+        }
+    </style>
