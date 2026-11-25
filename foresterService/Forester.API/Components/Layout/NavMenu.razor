@@ -18,7 +18,7 @@
         <div class="profile-bar">
             <nav>
                 <ul>
-                    <li><a class="profile-button" href="profile">Profile (name)</a></li>
+                    <li><a class="profile-button" href="profile">Profile (@context.User.Identity?.Name)</a></li>
                     <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
                 </ul>
             </nav>
