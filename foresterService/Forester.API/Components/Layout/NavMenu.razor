@@ -1,6 +1,11 @@
 ﻿@using Forester.Domain.Entities
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Forms
+
+@layout NoNavLayout
+@inject SignInManager<User> SignInManager
+@inject NavigationManager NavigationManager
 
 <AuthorizeView>
     <div class="menu-bar">
@@ -19,9 +24,22 @@
             <nav>
                 <ul>
                     <li><a class="profile-button" href="profile">Profile (@context.User.Identity?.Name)</a></li>
+<<<<<<< HEAD
+                    <li>
+                       <form action="/logout" method="post">
+                           <AntiforgeryToken/>
+                           
+                           <button type="submit" class="logout-button">Logout </button>
+                       </form>
+                    </li>
+||||||| 8366cf7
+                    <li><a class="profile-button" href="profile">Profile (name)</a></li>
                     <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
+=======
+                    <li><a class="logout-button" @onclick="LogOutUserAsync">Logout</a></li>
+>>>>>>> azure/develop
                 </ul>
-            </nav>
+            </nav>the 
         </div>
     </div>
 </AuthorizeView>
@@ -79,9 +97,9 @@
 </style>
 
 @code {
-
-    private Task LogOutUserAsync()
+    private async Task LogOutUserAsync()
     {
-        return Task.CompletedTask;
+        await SignInManager.SignOutAsync();
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 }

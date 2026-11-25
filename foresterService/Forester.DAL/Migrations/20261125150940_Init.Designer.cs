@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Forester.DAL.Migrations
 {
     [DbContext(typeof(ForesterDBContext))]
-    [Migration("20261119163002_Init")]
+    [Migration("20261125150940_Init")]
     partial class Init
     {
         /// <inheritdoc />
