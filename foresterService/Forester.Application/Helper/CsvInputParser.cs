@@ -2,9 +2,9 @@ using Forester.Domain.Entities;
 
 namespace Forester.Application.Helper;
 
-public class CsvInputParser
+public static class CsvInputParser
 {
-    public List<UserInput> Parse(IEnumerable<string> lines)
+    public static List<UserInput> Parse(IEnumerable<string> lines)
     {
         var result = new List<UserInput>();
 

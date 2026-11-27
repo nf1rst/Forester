@@ -30,6 +30,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
     options.AccessDeniedPath = "/error";
+    options.Cookie.MaxAge = TimeSpan.FromMinutes(15);
+    options.Cookie.Name = "forester_auth_cookie";
 });
 
 var dataDir = builder.Configuration["FORESTER_DATA_DIR"]

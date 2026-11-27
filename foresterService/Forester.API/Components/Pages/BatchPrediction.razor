@@ -1,12 +1,14 @@
 ﻿@page "/batchPrediction"
 @using System.Text.RegularExpressions
+@using Forester.Application.Helper
 @using Forester.Application.Interfaces
 @using Forester.Domain.Entities
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.QuickGrid
-@using Forester.Application.Helper
 @rendermode InteractiveServer
 
+@attribute [Authorize]
 @inject ILogService LogService
 @inject PredictionClient PredictionClient
 
@@ -20,107 +22,107 @@
         <InputFile class="upload-element" OnChange="OnInputFileChange"></InputFile>
         <button class="submit" type="button" @onclick="HandleFileUpload" @bind="@fileContainsBinaryValues">Submit input
             data</button>
-        <p class="error">@errorMessage</p>
-    </div>
-
-    @if (inputsAndPredictions is not null && inputsAndPredictions.Any())
-    {
-        <div class="result-display">
-            <QuickGrid class="quick-grid" Items="@inputsAndPredictions" Pagination="@pagination">
-                <PropertyColumn Property="@(p => p.Input.Elevation)" Title="Elevation" />
-                <PropertyColumn Property="@(p => p.Input.Aspect)" Title="Aspect" />
-                <PropertyColumn Property="@(p => p.Input.Slope)" Title="Slope" />
-                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
-                <PropertyColumn Property="@(p => p.Input.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
-                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
-                <PropertyColumn Property="@(p => p.Input.Hillshade_9am)" Title="Hillshade 9am" />
-                <PropertyColumn Property="@(p => p.Input.Hillshade_Noon)" Title="Hillshade Noon" />
-                <PropertyColumn Property="@(p => p.Input.Hillshade_3pm)" Title="Hillshade 3pm" />
-                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
-                <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
-                <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
-                <PropertyColumn Property="@(p => p.Result)" Title="Prediction" class="prediction-result-column" />
-            </QuickGrid>
-
-            <Paginator State="@pagination" />
+            <p class="error">@errorMessage</p>
         </div>
-    }
-</AuthorizeView>
-<style>
-    .prediction-result-column {
-        color: red;
-    }
 
-    .quick-grid {
-        word-wrap: break-word;
-    }
+        @if (inputsAndPredictions is not null && inputsAndPredictions.Any())
+        {
+            <div class="result-display">
+                <QuickGrid class="quick-grid" Items="@inputsAndPredictions" Pagination="@pagination">
+                    <PropertyColumn Property="@(p => p.Input.Elevation)" Title="Elevation" />
+                    <PropertyColumn Property="@(p => p.Input.Aspect)" Title="Aspect" />
+                    <PropertyColumn Property="@(p => p.Input.Slope)" Title="Slope" />
+                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
+                    <PropertyColumn Property="@(p => p.Input.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
+                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
+                    <PropertyColumn Property="@(p => p.Input.Hillshade_9am)" Title="Hillshade 9am" />
+                    <PropertyColumn Property="@(p => p.Input.Hillshade_Noon)" Title="Hillshade Noon" />
+                    <PropertyColumn Property="@(p => p.Input.Hillshade_3pm)" Title="Hillshade 3pm" />
+                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
+                    <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
+                    <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
+                    <PropertyColumn Property="@(p => p.Result)" Title="Prediction" class="prediction-result-column" />
+                </QuickGrid>
 
-    .upload-element::file-selector-button {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
+                <Paginator State="@pagination" />
+            </div>
+        }
+    </AuthorizeView>
+    <style>
+        .prediction-result-column {
+            color: red;
+        }
 
-    .upload-element {
-        text-align: center;
-        align-items: center;
-    }
+        .quick-grid {
+            word-wrap: break-word;
+        }
 
-    .result-display {
-        background-color: #1e1e1e;
-        width: 100%;
-        align-items: center;
-        text-align: center;
-        flex-direction: column;
-    }
+        .upload-element::file-selector-button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-    .result-display table {
-        width: 100%;
-        table-layout: fixed;
-    }
+        .upload-element {
+            text-align: center;
+            align-items: center;
+        }
 
-    .result-display th,
-    .result-display td {
-        text-align: center;
-    }
+        .result-display {
+            background-color: #1e1e1e;
+            width: 100%;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+        }
 
-    .result-display td {
-        border-left: 1px solid orange;
-        border-right: 1px solid orange;
-    }
+        .result-display table {
+            width: 100%;
+            table-layout: fixed;
+        }
 
-    h6,
-    h2 {
-        text-align: center;
-        margin-top: 1%
-    }
+        .result-display th,
+        .result-display td {
+            text-align: center;
+        }
 
-    .upload-area {
-        border: 1px solid orange;
-        width: 40%;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-        text-align: center;
-    }
+        .result-display td {
+            border-left: 1px solid orange;
+            border-right: 1px solid orange;
+        }
 
-    .upload-element {
-        background-color: #1e1e1e;
-        border-radius: 5px;
-        color: white;
-        height: 200px;
-        align-content: center;
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-        text-align: center;
-    }
+        h6,
+        h2 {
+            text-align: center;
+            margin-top: 1%
+        }
 
-    .submit {
-        background-color: darkgreen;
-        color: white;
-    }
-</style>
+        .upload-area {
+            border: 1px solid orange;
+            width: 40%;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            text-align: center;
+        }
+
+        .upload-element {
+            background-color: #1e1e1e;
+            border-radius: 5px;
+            color: white;
+            height: 200px;
+            align-content: center;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            text-align: center;
+        }
+
+        .submit {
+            background-color: darkgreen;
+            color: white;
+        }
+    </style>
 
 @code {
     private IBrowserFile? selectedFile;
@@ -142,7 +144,7 @@
         }
         string[] lines = await readFileAsLines();
 
-        List<UserInput> csvInputsList = fillUserInputList(lines);
+        List<UserInput> csvInputsList = CsvInputParser.Parse(lines);
 
         var predictions = await sendBatchPredictionRequest(csvInputsList);
 
@@ -155,20 +157,11 @@
 predictions)).AsQueryable();
     }
 
-    private List<UserInput> fillUserInputList(string[] lines)
+    private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
     {
-        List<UserInput> csvInputsList = new();
-        for (int i = 0; i <= lines.Count() - 1; i++)
-        {
-            int[] details = lines[i].Split(",").Select(int.Parse).ToArray();
-
-            var csvInput = DetailsIntoCsvInput(details);
-            setUserInputBinaryValues(csvInput, details);
-            csvInputsList.Add(csvInput);
-        }
-        return csvInputsList;
+        var result = await PredictionClient.PredictBatchAsync(csvInputsList);
+        return result.predictions;
     }
-
     private async Task<string[]> readFileAsLines()
     {
         using Stream? fileStream = selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10);
@@ -177,40 +170,5 @@ predictions)).AsQueryable();
         string content = await reader.ReadToEndAsync();
         string[] lines = content.Split("\n");
         return lines;
-    }
-
-    private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
-    {
-        var result = await PredictionClient.PredictBatchAsync(csvInputsList);
-        return result.predictions;
-    }
-
-    private void setUserInputBinaryValues(UserInput csvInput, int[] details)
-    {
-        int wildernessIndex = Array.IndexOf(details, 1, 10, 4);
-        csvInput.Wilderness_Area = wildernessIndex != -1 ? (wildernessIndex - 10) + 1 : 0;
-
-        int soilIndex = Array.IndexOf(details, 1, 14, 40);
-        csvInput.Soil_Type = soilIndex != -1 ? (soilIndex - 14) + 1 : 0;
-    }
-
-    private UserInput DetailsIntoCsvInput(int[] details)
-    {
-        UserInput input = new UserInput()
-        {
-            Elevation = details[0],
-            Aspect = details[1],
-            Slope = details[2],
-            Horizontal_Distance_To_Hydrology = details[3],
-            Vertical_Distance_To_Hydrology = details[4],
-            Horizontal_Distance_To_Roadways = details[5],
-            Hillshade_9am = details[6],
-            Hillshade_Noon = details[7],
-            Hillshade_3pm = details[8],
-            Horizontal_Distance_To_Fire_Points = details[9],
-            Soil_Type = 1, //placeholder
-            Wilderness_Area = 1 //placeholder
-        };
-        return input;
     }
 }
