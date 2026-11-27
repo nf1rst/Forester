@@ -1,12 +1,16 @@
 ﻿@page "/batchPrediction"
 @using System.Text.RegularExpressions
+@using Forester.Application.Helper
 @using Forester.Application.Interfaces
 @using Forester.Domain.Entities
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.QuickGrid
 @rendermode InteractiveServer
 
+@attribute [Authorize]
 @inject ILogService LogService
+@inject PredictionClient PredictionClient
 
 <AuthorizeView>
     <h2>Batch Prediction</h2>
@@ -120,7 +124,6 @@
         }
     </style>
 
-
 @code {
     private IBrowserFile? selectedFile;
     private string errorMessage = "";
@@ -141,7 +144,7 @@
         }
         string[] lines = await readFileAsLines();
 
-        List<UserInput> csvInputsList = fillUserInputList(lines);
+        List<UserInput> csvInputsList = CsvInputParser.Parse(lines);
 
         var predictions = await sendBatchPredictionRequest(csvInputsList);
 
@@ -154,20 +157,11 @@
 predictions)).AsQueryable();
     }
 
-    private List<UserInput> fillUserInputList(string[] lines)
+    private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
     {
-        List<UserInput> csvInputsList = new();
-        for (int i = 0; i <= lines.Count() - 1; i++)
-        {
-            int[] details = lines[i].Split(",").Select(int.Parse).ToArray();
-
-            var csvInput = DetailsIntoCsvInput(details);
-            setUserInputBinaryValues(csvInput, details);
-            csvInputsList.Add(csvInput);
-        }
-        return csvInputsList;
+        var result = await PredictionClient.PredictBatchAsync(csvInputsList);
+        return result.predictions;
     }
-
     private async Task<string[]> readFileAsLines()
     {
         using Stream? fileStream = selectedFile.OpenReadStream(maxAllowedSize: 1024 * 1024 * 10);
@@ -177,67 +171,4 @@ predictions)).AsQueryable();
         string[] lines = content.Split("\n");
         return lines;
     }
-
-    private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
-    {
-        string modelContactContainerURL = "http://fastapi-container:8000/";
-        string modelContactLocalURL = "http://localhost:8000/";
-
-        var result = await contactFastAPIService(modelContactContainerURL, csvInputsList);
-        return result;
-    }
-
-    private async Task<List<int>> contactFastAPIService(string modelContactContainerURL, List<UserInput> csvInputsList)
-    {
-        HttpClient client = new HttpClient();
-        client.BaseAddress = new Uri(modelContactContainerURL);
-
-        var payload = new { instances = csvInputsList };
-        HttpResponseMessage response = await client.PostAsJsonAsync("predict/batch", payload, new
-System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNamingPolicy = null
-        });
-                
-        var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
-
-        await LogService.LogUserBatchPredictionRequest(selectedFile.Name, selectedFile.Size, "asdf");
-        return result?.predictions ?? new List<int>();
-    }
-
-    private void setUserInputBinaryValues(UserInput csvInput, int[] details)
-    {
-        int wildernessIndex = Array.IndexOf(details, 1, 10, 4);
-        csvInput.Wilderness_Area = wildernessIndex != -1 ? (wildernessIndex - 10) + 1 : 0;
-
-        int soilIndex = Array.IndexOf(details, 1, 14, 40);
-        csvInput.Soil_Type = soilIndex != -1 ? (soilIndex - 14) + 1 : 0;
-    }
-
-    private UserInput DetailsIntoCsvInput(int[] details)
-    {
-        UserInput input = new UserInput()
-        {
-            Elevation = details[0],
-            Aspect = details[1],
-            Slope = details[2],
-            Horizontal_Distance_To_Hydrology = details[3],
-            Vertical_Distance_To_Hydrology = details[4],
-            Horizontal_Distance_To_Roadways = details[5],
-            Hillshade_9am = details[6],
-            Hillshade_Noon = details[7],
-            Hillshade_3pm = details[8],
-            Horizontal_Distance_To_Fire_Points = details[9],
-            Soil_Type = 1, //placeholder
-            Wilderness_Area = 1 //placeholder
-        };
-        return input;
-    }
-
-    private sealed class BatchPredictionResponse
-    {
-        public List<int> predictions { get; set; } = new();
-    }
-
-
 }

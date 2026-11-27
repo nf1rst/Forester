@@ -1,5 +1,6 @@
 using Forester.API.Components;
 using Forester.Application.Extensions;
+using Forester.Application.Helper;
 using Forester.DAL.Data;
 using Forester.DAL.Extensions;
 using Forester.Domain.Entities;
@@ -29,16 +30,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
     options.AccessDeniedPath = "/error";
+    options.Cookie.MaxAge = TimeSpan.FromMinutes(15);
+    options.Cookie.Name = "forester_auth_cookie";
 });
-
 
 var dataDir = builder.Configuration["FORESTER_DATA_DIR"]
     ?? Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "forester-data"));
 
-
 var dbPath = Path.Combine(dataDir, "forester.db");
 var keysPath = Path.Combine(dataDir, "keys");
-
 
 Directory.CreateDirectory(dataDir);
 Directory.CreateDirectory(keysPath);
@@ -53,11 +53,11 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddControllers();
 
-
 builder.Services.AddDataProtection()
 .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
 .SetApplicationName("Forester");
 
+builder.Services.AddHttpClient<PredictionClient>(c => c.BaseAddress = new Uri(builder.Configuration["FASTAPI_URL"] ?? "http://localhost:8000/"));
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var app = builder.Build();
 
