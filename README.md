@@ -9,13 +9,11 @@ The champion model can be accessed on on localhost:8000
 For more detailed overview access Swagger UI on localhost:8000/docs
 
 ## Forester Web Service
-The access string for contacting the FastAPI endpoints needs to be manually changed inside the foresterService/Forester.API/SinglePrediction in the sendSinglePredictionRequest:
-* Local environment: use modelContactLocalURL
-* Containerized environemnt: use modelContactContainerURL
+Connection string for local and container start will be automatically recognized
 
-The access string for contacting the FastAPI endpoints needs to be manually changed inside the foresterService/Forester.API/BatchPrediction in the sendBatchPredictionRequest:
-* Local environment: use modelContactLocalURL
-* Containerized environemnt: use modelContactContainerURL
+Application will try to load an env variable from the dockerfile and use localhost it it does not find it 
+
+Developer does not need to change the connection string manually anymore
 
 ### Local start 
 Before running the web application, make sure the registry and then the fastAPI is activated inside the virtual environment - in that order

@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 
+@attribute [Authorize]
+
 <AuthorizeView>
     <PageTitle>Home</PageTitle>
     <h1>Hello, welcome to Forester @context.User.Identity?.Name</h1>

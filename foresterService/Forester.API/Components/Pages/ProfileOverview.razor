@@ -7,6 +7,8 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @rendermode InteractiveServer
 
+@attribute [Authorize]
+
 @inject ILogService LogService
 
 <AuthorizeView>
