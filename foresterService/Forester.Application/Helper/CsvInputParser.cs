@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using Forester.Application.Exceptions;
 using Forester.Domain.Entities;
 
 namespace Forester.Application.Helper;
@@ -8,11 +10,13 @@ public static class CsvInputParser
     {
         var result = new List<UserInput>();
 
-        foreach (var line in lines)
+        foreach (var line in lines.Where(l => l.Length > 0))
         {
             int[] values = line.Split(',').Select(v => int.Parse(v)).ToArray();
             if (values.Count() != 54)
                 throw new FormatException($"Expected 54 values per row, but found {values.Count()}");
+
+            ValidateInputValues(values);
 
             int wilderness = Array.IndexOf(values, 1, 10, 4);
             int soil = Array.IndexOf(values, 1, 14, 40);
@@ -34,5 +38,33 @@ public static class CsvInputParser
             });
         }
         return result;
+    }
+
+    private static void ValidateInputValues(int[] values)
+    {
+        if (!HillshadeBetween0And255(values[6]) || !HillshadeBetween0And255(values[7]) ||
+            !HillshadeBetween0And255(values[8]))
+        {
+            throw new InvalidInputException("Hillshade values must be between 0 and 255");
+        }
+        if (values[2] < 0 || values[2] > 360)
+        {
+            throw new InvalidInputException("Slope values must be between 0 and 360");
+        }
+        ValidateOneHot(values, 10, 4, "Wilderness Area");
+        ValidateOneHot(values, 14, 40, "Soil Type");
+    }
+
+    private static void ValidateOneHot(int[] values, int start, int length, string name)
+    {
+        var block = values.Skip(start).Take(length).ToArray();
+        if (block.Any(v => v != 0 && v != 1)) throw new InvalidInputException($"{name} column should contain only values 0 and 1");
+
+        if (block.Count(v => v == 1) != 1) throw new InvalidInputException($"{name} column should only containt one value set to 1 per row");
+    }
+
+    private static bool HillshadeBetween0And255(int hillshade)
+    {
+        return (hillshade >= 0 && hillshade <= 255);
     }
 }
