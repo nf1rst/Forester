@@ -6,13 +6,13 @@
 @using Forester.Domain.Entities
 @using Microsoft.AspNetCore.Components;
 @using Microsoft.AspNetCore.Components.Authorization
+@using Forester.Application.Helper
 
-@inject ILogService Logservice
+@inject ILogService LogService
+@inject PredictionClient PredictionClient
 
 @rendermode InteractiveServer
 @* https://stackoverflow.com/questions/65349476/blazor-cant-find-referenced-component-from-other-folder *@
-
-@inject ILogService LogService
 
 <AuthorizeView>
     <h2>Single Prediction</h2>
@@ -139,7 +139,7 @@
             await sendSinglePredictionRequest(userInputs);
 
             StateHasChanged();
-            
+
             await LogService.LogUserPredictionRequest(userInputs, modelPredictionResult, "asdf");
         }
         catch (InvalidInputException e)
@@ -157,30 +157,14 @@
 
     private async Task sendSinglePredictionRequest(UserInput userInputs)
     {
-        string modelContactContainerURL = "http://fastapi-container:8000/";
-        string modelContactLocalURL = "http://localhost:8000/";
-
-        await contactFastAPIService(modelContactContainerURL, userInputs);
+        await contactFastAPIService(userInputs);
         //https://stackoverflow.com/questions/4734116/find-and-extract-a-number-from-a-string
     }
 
-    private async Task contactFastAPIService(string modelContactContainerURL, UserInput userInputs)
+    private async Task contactFastAPIService(UserInput userInput)
     {
-        HttpClient client = new HttpClient();
-        client.BaseAddress = new Uri(modelContactContainerURL);
-
-        HttpResponseMessage response = await client.PostAsJsonAsync("predict/single", userInputs, new
-System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNamingPolicy = null
-        });
-        modelPredictionResult = await ParsePredictionResponse(response);
-    }
-
-    private async Task<int> ParsePredictionResponse(HttpResponseMessage response)
-    {
-        var result = Regex.Match(await response.Content.ReadAsStringAsync(), @"\d+").Value;
-        return int.Parse(result);
+        int result = await PredictionClient.PredictAsync(userInput);
+        modelPredictionResult = result;
     }
 
     private void ValidateInputValues(UserInput input)
@@ -208,6 +192,4 @@ System.Text.Json.JsonSerializerOptions
     {
         return (hillshade >= 0 && hillshade <= 255);
     }
-
 }
-

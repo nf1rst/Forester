@@ -1,6 +1,7 @@
 <Solution>
-  <Project Path="Forester.API/Forester.API.csproj" />
-  <Project Path="Forester.Application/Forester.Application.csproj" />
-  <Project Path="Forester.DAL/Forester.DAL.csproj" />
-  <Project Path="Forester.Domain/Forester.Domain.csproj" />
+  <Project Path="Forester.API/Forester.API.csproj"/>
+  <Project Path="Forester.Application/Forester.Application.csproj"/>
+  <Project Path="Forester.DAL/Forester.DAL.csproj"/>
+  <Project Path="Forester.Domain/Forester.Domain.csproj"/>
+  <Project Path="Forester.TESTS/Forester.TESTS.csproj"/>
 </Solution>

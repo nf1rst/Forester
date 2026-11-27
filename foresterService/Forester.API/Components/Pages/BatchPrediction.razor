@@ -4,9 +4,11 @@
 @using Forester.Domain.Entities
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.QuickGrid
+@using Forester.Application.Helper
 @rendermode InteractiveServer
 
 @inject ILogService LogService
+@inject PredictionClient PredictionClient
 
 <AuthorizeView>
     <h2>Batch Prediction</h2>
@@ -18,108 +20,107 @@
         <InputFile class="upload-element" OnChange="OnInputFileChange"></InputFile>
         <button class="submit" type="button" @onclick="HandleFileUpload" @bind="@fileContainsBinaryValues">Submit input
             data</button>
-            <p class="error">@errorMessage</p>
+        <p class="error">@errorMessage</p>
+    </div>
+
+    @if (inputsAndPredictions is not null && inputsAndPredictions.Any())
+    {
+        <div class="result-display">
+            <QuickGrid class="quick-grid" Items="@inputsAndPredictions" Pagination="@pagination">
+                <PropertyColumn Property="@(p => p.Input.Elevation)" Title="Elevation" />
+                <PropertyColumn Property="@(p => p.Input.Aspect)" Title="Aspect" />
+                <PropertyColumn Property="@(p => p.Input.Slope)" Title="Slope" />
+                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
+                <PropertyColumn Property="@(p => p.Input.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
+                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
+                <PropertyColumn Property="@(p => p.Input.Hillshade_9am)" Title="Hillshade 9am" />
+                <PropertyColumn Property="@(p => p.Input.Hillshade_Noon)" Title="Hillshade Noon" />
+                <PropertyColumn Property="@(p => p.Input.Hillshade_3pm)" Title="Hillshade 3pm" />
+                <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
+                <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
+                <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
+                <PropertyColumn Property="@(p => p.Result)" Title="Prediction" class="prediction-result-column" />
+            </QuickGrid>
+
+            <Paginator State="@pagination" />
         </div>
+    }
+</AuthorizeView>
+<style>
+    .prediction-result-column {
+        color: red;
+    }
 
-        @if (inputsAndPredictions is not null && inputsAndPredictions.Any())
-        {
-            <div class="result-display">
-                <QuickGrid class="quick-grid" Items="@inputsAndPredictions" Pagination="@pagination">
-                    <PropertyColumn Property="@(p => p.Input.Elevation)" Title="Elevation" />
-                    <PropertyColumn Property="@(p => p.Input.Aspect)" Title="Aspect" />
-                    <PropertyColumn Property="@(p => p.Input.Slope)" Title="Slope" />
-                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Hydrology)" Title="Horiz. Hydrology" />
-                    <PropertyColumn Property="@(p => p.Input.Vertical_Distance_To_Hydrology)" Title="Vert. Hydrology" />
-                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Roadways)" Title="Horiz. Roadways" />
-                    <PropertyColumn Property="@(p => p.Input.Hillshade_9am)" Title="Hillshade 9am" />
-                    <PropertyColumn Property="@(p => p.Input.Hillshade_Noon)" Title="Hillshade Noon" />
-                    <PropertyColumn Property="@(p => p.Input.Hillshade_3pm)" Title="Hillshade 3pm" />
-                    <PropertyColumn Property="@(p => p.Input.Horizontal_Distance_To_Fire_Points)" Title="Horiz. Fire Points" />
-                    <PropertyColumn Property="@(p => p.Input.Wilderness_Area)" Title="Wilderness (1-4)" />
-                    <PropertyColumn Property="@(p => p.Input.Soil_Type)" Title="Soil Type (1-40)" />
-                    <PropertyColumn Property="@(p => p.Result)" Title="Prediction" class="prediction-result-column" />
-                </QuickGrid>
+    .quick-grid {
+        word-wrap: break-word;
+    }
 
-                <Paginator State="@pagination" />
-            </div>
-        }
-    </AuthorizeView>
-    <style>
-        .prediction-result-column {
-            color: red;
-        }
+    .upload-element::file-selector-button {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-        .quick-grid {
-            word-wrap: break-word;
-        }
+    .upload-element {
+        text-align: center;
+        align-items: center;
+    }
 
-        .upload-element::file-selector-button {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .result-display {
+        background-color: #1e1e1e;
+        width: 100%;
+        align-items: center;
+        text-align: center;
+        flex-direction: column;
+    }
 
-        .upload-element {
-            text-align: center;
-            align-items: center;
-        }
+    .result-display table {
+        width: 100%;
+        table-layout: fixed;
+    }
 
-        .result-display {
-            background-color: #1e1e1e;
-            width: 100%;
-            align-items: center;
-            text-align: center;
-            flex-direction: column;
-        }
+    .result-display th,
+    .result-display td {
+        text-align: center;
+    }
 
-        .result-display table {
-            width: 100%;
-            table-layout: fixed;
-        }
+    .result-display td {
+        border-left: 1px solid orange;
+        border-right: 1px solid orange;
+    }
 
-        .result-display th,
-        .result-display td {
-            text-align: center;
-        }
+    h6,
+    h2 {
+        text-align: center;
+        margin-top: 1%
+    }
 
-        .result-display td {
-            border-left: 1px solid orange;
-            border-right: 1px solid orange;
-        }
+    .upload-area {
+        border: 1px solid orange;
+        width: 40%;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        text-align: center;
+    }
 
-        h6,
-        h2 {
-            text-align: center;
-            margin-top: 1%
-        }
+    .upload-element {
+        background-color: #1e1e1e;
+        border-radius: 5px;
+        color: white;
+        height: 200px;
+        align-content: center;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        text-align: center;
+    }
 
-        .upload-area {
-            border: 1px solid orange;
-            width: 40%;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            text-align: center;
-        }
-
-        .upload-element {
-            background-color: #1e1e1e;
-            border-radius: 5px;
-            color: white;
-            height: 200px;
-            align-content: center;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            text-align: center;
-        }
-
-        .submit {
-            background-color: darkgreen;
-            color: white;
-        }
-    </style>
-
+    .submit {
+        background-color: darkgreen;
+        color: white;
+    }
+</style>
 
 @code {
     private IBrowserFile? selectedFile;
@@ -180,29 +181,8 @@ predictions)).AsQueryable();
 
     private async Task<List<int>> sendBatchPredictionRequest(List<UserInput> csvInputsList)
     {
-        string modelContactContainerURL = "http://fastapi-container:8000/";
-        string modelContactLocalURL = "http://localhost:8000/";
-
-        var result = await contactFastAPIService(modelContactContainerURL, csvInputsList);
-        return result;
-    }
-
-    private async Task<List<int>> contactFastAPIService(string modelContactContainerURL, List<UserInput> csvInputsList)
-    {
-        HttpClient client = new HttpClient();
-        client.BaseAddress = new Uri(modelContactContainerURL);
-
-        var payload = new { instances = csvInputsList };
-        HttpResponseMessage response = await client.PostAsJsonAsync("predict/batch", payload, new
-System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNamingPolicy = null
-        });
-                
-        var result = await response.Content.ReadFromJsonAsync<BatchPredictionResponse>();
-
-        await LogService.LogUserBatchPredictionRequest(selectedFile.Name, selectedFile.Size, "asdf");
-        return result?.predictions ?? new List<int>();
+        var result = await PredictionClient.PredictBatchAsync(csvInputsList);
+        return result.predictions;
     }
 
     private void setUserInputBinaryValues(UserInput csvInput, int[] details)
@@ -233,11 +213,4 @@ System.Text.Json.JsonSerializerOptions
         };
         return input;
     }
-
-    private sealed class BatchPredictionResponse
-    {
-        public List<int> predictions { get; set; } = new();
-    }
-
-
 }
